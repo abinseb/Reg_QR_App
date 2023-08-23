@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Button } from "react-native-paper";
 import { BarCodeScanner } from 'expo-barcode-scanner';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 const Scan = () => {
     const [hasPermission, setHasPermission] = useState(null);
@@ -18,6 +18,11 @@ const Scan = () => {
         })();
     }, []);
 
+    const handleScanAgain = () => {
+        setScanned(false); // Re-enable scanning
+        setQRData('')
+    }
+    
     const handleBarCodeScanned = ({ type, data }) => {
         setScanned(true);
         setQRData(data);
@@ -37,22 +42,31 @@ const Scan = () => {
         navigation.navigate('Input');
     }
 
+    // useFocusEffect(
+    //     React.useCallback(() => {
+    //         // Reset scanned state and QR data when the component gains focus
+    //         setScanned(false);
+    //         setQRData('');
+    //         return () => {};
+    //     }, [])
+    // );
+
     return (
         <View style={styles.container}>
             <BarCodeScanner
-                onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+                onBarCodeScanned={scanned ? null || false : handleBarCodeScanned}
                 style={styles.absoluteFillObject}
             />
-            {scanned && (
+            {scanned ? (
                 <Button
                     style={styles.btn}
                     color="white"
                     mode="contained"
-                    onPress={() => setScanned(false)}
+                    onPress={handleScanAgain} // Reset scanned state to false
                 >
                     Tap to Scan Again
                 </Button>
-            )}
+            ) : null}
             <Text style={styles.qrDataText}>{qrData}</Text>
             <View style={styles.textClick}>
                 <Text style={styles.text1}>If QR won't work?{" "}</Text>
@@ -63,6 +77,7 @@ const Scan = () => {
         </View>
     )
 }
+
 
 export default Scan;
 

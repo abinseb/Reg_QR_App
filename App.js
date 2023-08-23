@@ -17,7 +17,7 @@ export default function App() {
         >
           <Stack.Screen name="Home" component={Home} options={{headerShown:false}} />
           <Stack.Screen name="Scan" component={Scan} />
-          <Stack.Screen name="ValidateQR" component={ValidateQR} />
+          <Stack.Screen name="ValidateQR" component={ValidateQR} options={{headerShown:false}}/>
           <Stack.Screen name="Input" component={InputDataManualy} />
 
 
