@@ -1,16 +1,48 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Pressable,BackHandler } from "react-native";
+import { View, Text, StyleSheet,BackHandler} from "react-native";
 import { Button } from "react-native-paper";
 import Gun from "gun";
+import { useIpContext } from "../IpContext";
 
 // gun js 
+// const [gun, setGun]=(`http://${ip}:5000/gun`);
 
 const ValidateQR = ({ route ,navigation}) => {
+    
     const [userob,setuserob] = useState("")
     const { qrData } = route.params;
-    const gun = Gun({
-        peers: ['http:192.168.1.126:5000/gun']
-      })
+    // ipaddress
+    const {ipAddress} = useIpContext();
+    const [connectedAddresses, setConnectedAddresses] = useState([]);
+    const gun=Gun({
+      peers:['http://192.168.102.163:5000/gun']
+    })
+    useEffect(() => {
+      const connectToServers = () => {
+        const connected = [];
+  
+        ipAddress.forEach((ip) => {
+          console.log({ip});
+          
+            gun = Gun({
+            peers:[`http://${ip}:5000/gun`]
+          });
+  
+          // Set up an event listener to check connection status
+          gun.on('out', () => {
+            connected.push(ip);
+            setConnectedAddresses(connected);
+          });
+  
+          // ... Other logic
+        });
+      };
+  
+      connectToServers();
+    }, [ipAddress]);
+  
+
+    
     var index="init123"
 
  //function acknowlege  network for new user 
@@ -21,6 +53,23 @@ const ValidateQR = ({ route ,navigation}) => {
       
     }
   }
+  function pad(n, length) {
+    var len = length - (''+n).length;
+    return (len > 0 ? new Array(++len).join('0') : '') + n
+  }
+
+  function getusers()
+  {
+    for (let i=1;i<=3000;i++)
+    {
+      console.log(pad(i,3))
+      gun.get(index+'/'+pad(i,3)).once((data) =>{
+       console.log(data)
+      })
+    }
+    
+  }
+  
   
   function getuser()
   {
@@ -49,6 +98,7 @@ const ValidateQR = ({ route ,navigation}) => {
  }
 
 //  fetching data from gun js
+
 useEffect(()=>{
     gun.get(index+'/'+qrData).once((data) =>{
         if ( data === undefined)
@@ -170,7 +220,18 @@ useEffect(()=>{
                   </Button>
                 </View>
                 }
+
+              <Text>Connected Servers:</Text>
+                    {/* <ul>
+                      {connectedAddresses.map((ip, index) => (
+                        <li key={index}>{ip}</li>
+                      ))}
+                    </ul> */}
             </View>
+            <Button mode="contained" style={styles.cancelButton} 
+                      onPress={getusers}>
+              load data
+            </Button>
         </View>
 
         
@@ -224,14 +285,6 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       marginTop: 20,
       marginLeft: 50,
-  },
-  pressVerify:{
-    width: '50%',
-    backgroundColor: '#006400',
-    alignSelf: 'center',
-    paddingVertical: 10,
-    borderRadius: 5,
-
   },
   txtView:{
     color:'#006400',

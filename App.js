@@ -6,11 +6,16 @@ import Home from "./pages/Home";
 import Scan from './pages/ReadQR/Scan';
 import ValidateQR from "./pages/ValidateQR/ValidateQR";
 import InputDataManualy from "./pages/ReadQR/InputData";
+import ConnectServer from "./pages/ConnectServer/Connection";
+
+// ipProvider
+import { IPProvider } from "./pages/IpContext";
 
 export default function App() {
   const Stack = createNativeStackNavigator();
 
   return (
+    <IPProvider>
     <NavigationContainer>
         <Stack.Navigator
           initialRouteName="Home"
@@ -19,10 +24,12 @@ export default function App() {
           <Stack.Screen name="Scan" component={Scan} />
           <Stack.Screen name="ValidateQR" component={ValidateQR} options={{headerShown:false}}/>
           <Stack.Screen name="Input" component={InputDataManualy} />
+          <Stack.Screen name="serverConnection" component={ConnectServer} />
 
 
         </Stack.Navigator>
     </NavigationContainer>
+    </IPProvider>
     
   );
 }

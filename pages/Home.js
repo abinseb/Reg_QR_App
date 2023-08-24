@@ -1,15 +1,55 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { TouchableOpacity } from "react-native";
-import { View,Text ,StyleSheet, Image,} from "react-native";
-import { Button } from 'react-native-paper'
+import { View,Text ,StyleSheet, Image,BackHandler,Alert} from "react-native";
+import { Button } from 'react-native-paper';
 
 const Home=({navigation})=>{
     const handleNavigate=()=>{
         navigation.navigate('Input');
     }
+
+    // avoid backnavigation
+   
+        const handleBacknavigation=()=>{
+            Alert.alert(
+                "Exit App",
+                "Are you sure you want to exist?",
+                [
+                    {
+                        text:"No",
+                        onPress:()=>{
+                            navigation.navigate("Home");
+                        },
+                        style:"cancel"
+                    },
+                    {
+                        text:"Yes",
+                        onPress:()=>{
+                            BackHandler.exitApp();
+                        }
+                    }
+                ],
+                {cancelable:false}
+            );
+            return true;
+        };
+
+    useEffect(()=>{
+        const backHandler = BackHandler.addEventListener(
+            "hardwareBackPress",
+            handleBacknavigation
+        );
+        return ()=>{
+            backHandler.remove();
+        }
+    },[navigation]);
+
     return(
         <View style={styles.container}>
+            <View style={styles.connectButtonContainer}>
+                <Button onPress={()=>navigation.navigate("serverConnection")}>Connect Server</Button>
+            </View>
             <View style={styles.imageContainer}>
                 <Image 
                     source={require('./../assets/images.png')}
@@ -82,5 +122,8 @@ const styles = StyleSheet.create({
         fontSize: 22,
         fontWeight: '700',
         color: '#fff'
+    },
+    connectButtonContainer:{
+        
     },
 })
