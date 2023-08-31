@@ -17,7 +17,7 @@
     "gun": "^0.2020.1239",
     "native-base": "^3.4.28",
     "react": "18.2.0",
-    "react-native": "0.72.3",
+    "react-native": "0.72.4",
     "react-native-paper": "^5.10.1"
   },
   "devDependencies": {

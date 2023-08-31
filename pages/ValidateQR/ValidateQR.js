@@ -14,32 +14,10 @@ const ValidateQR = ({ route ,navigation}) => {
     // ipaddress
     const {ipAddress} = useIpContext();
     const [connectedAddresses, setConnectedAddresses] = useState([]);
-    const gun=Gun({
-      peers:['http://192.168.102.163:5000/gun']
+    var gun=Gun({
+     // peers:['http://192.168.1.126:5000/gun']
     })
-    useEffect(() => {
-      const connectToServers = () => {
-        const connected = [];
-  
-        ipAddress.forEach((ip) => {
-          console.log({ip});
-          
-            gun = Gun({
-            peers:[`http://${ip}:5000/gun`]
-          });
-  
-          // Set up an event listener to check connection status
-          gun.on('out', () => {
-            connected.push(ip);
-            setConnectedAddresses(connected);
-          });
-  
-          // ... Other logic
-        });
-      };
-  
-      connectToServers();
-    }, [ipAddress]);
+    
   
 
     
@@ -100,7 +78,12 @@ const ValidateQR = ({ route ,navigation}) => {
 //  fetching data from gun js
 
 useEffect(()=>{
-    gun.get(index+'/'+qrData).once((data) =>{
+  const gun1=Gun({
+    peers:[`http://${ipAddress[0]}/gun`]
+  })
+  
+  console.log([`http://${ipAddress[0]}/gun`])
+    gun1.get(index+'/'+qrData).once((data) =>{
         if ( data === undefined)
         {
           alert ("user not found");
@@ -118,7 +101,7 @@ useEffect(()=>{
         )
         }
       })
-      gun.get(index+'/'+qrData).on((data) =>{
+      gun1.get(index+'/'+qrData).on((data) =>{
         if ( data === undefined)
         {
           alert ("user not found");
