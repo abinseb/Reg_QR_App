@@ -3,6 +3,7 @@ import { View, Text, StyleSheet,BackHandler} from "react-native";
 import { Button } from "react-native-paper";
 import Gun from "gun";
 import { useIpContext } from "../IpContext";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // gun js 
 // const [gun, setGun]=(`http://${ip}:5000/gun`);
@@ -38,10 +39,13 @@ const ValidateQR = ({ route ,navigation}) => {
 
   function getusers()
   {
+    gun1=Gun({
+      peers:[`http://${ipAddress[0]}/gun`]
+    })
     for (let i=1;i<=3000;i++)
     {
       console.log(pad(i,3))
-      gun.get(index+'/'+pad(i,3)).once((data) =>{
+      gun1.get(index+'/'+pad(i,3)).once((data) =>{
        console.log(data)
       })
     }
@@ -51,6 +55,7 @@ const ValidateQR = ({ route ,navigation}) => {
   
   function getuser()
   {
+
     gun.get(index+'/'+qrData).once((data) =>{
       if ( data === undefined)
       {
@@ -123,9 +128,12 @@ useEffect(()=>{
 
 const handleVerification=async()=>{
     // alert("succcess");
+    const gun1=Gun({
+      peers:[`http://${ipAddress[0]}/gun`]
+    })
     try{
       if(userob!=="")
-        {await  console.log(gun.get(index+'/'+qrData).put({"Verified":true}))
+        {await  console.log(gun1.get(index+'/'+qrData).put({"Verified":true}))
         alert("Verification Success");
         navigateToHome();}
         else{
@@ -158,7 +166,7 @@ useEffect(()=>{
 },[]);
 
     return (
-            <View style={styles.container}>
+            <SafeAreaView style={styles.container}>
             <View style={styles.viewBox}>
                 <View style={styles.profileBox}>
                     <Text style={styles.label}>Id: </Text>
@@ -215,7 +223,7 @@ useEffect(()=>{
                       onPress={getusers}>
               load data
             </Button>
-        </View>
+        </SafeAreaView>
 
         
         

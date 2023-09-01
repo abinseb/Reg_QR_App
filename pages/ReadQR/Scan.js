@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Button } from "react-native-paper";
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Scan = () => {
     const [hasPermission, setHasPermission] = useState(null);
@@ -52,7 +53,7 @@ const Scan = () => {
     // );
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <BarCodeScanner
                 onBarCodeScanned={scanned ? null || false : handleBarCodeScanned}
                 style={styles.absoluteFillObject}
@@ -74,7 +75,7 @@ const Scan = () => {
                     <Text style={styles.text2}>Click</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+        </SafeAreaView>
     )
 }
 

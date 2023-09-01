@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { TouchableOpacity } from "react-native";
 import { View,Text ,StyleSheet, Image,BackHandler,Alert} from "react-native";
 import { Button } from 'react-native-paper';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Home=({navigation})=>{
     const handleNavigate=()=>{
@@ -46,7 +47,7 @@ const Home=({navigation})=>{
     },[navigation]);
 
     return(
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <View style={styles.connectButtonContainer}>
                 <Button onPress={()=>navigation.navigate("serverConnection")}>Connect Server</Button>
             </View>
@@ -71,7 +72,7 @@ const Home=({navigation})=>{
                 </TouchableOpacity>
             </View>
             
-        </View>
+        </SafeAreaView>
     )
 }
 

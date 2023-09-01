@@ -1,6 +1,6 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
+import { enableScreens } from "react-native-screens";
 // import components
 import Home from "./pages/Home";
 import Scan from './pages/ReadQR/Scan';
@@ -10,6 +10,9 @@ import ConnectServer from "./pages/ConnectServer/Connection";
 
 // ipProvider
 import { IPProvider } from "./pages/IpContext";
+
+// enable screens 
+enableScreens();
 
 export default function App() {
   const Stack = createNativeStackNavigator();
