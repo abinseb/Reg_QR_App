@@ -49,7 +49,7 @@ const Home=({navigation})=>{
     return(
         <SafeAreaView style={styles.container}>
             <View style={styles.connectButtonContainer}>
-                <Button onPress={()=>navigation.navigate("serverConnection")}>Connect Server</Button>
+                <Button textColor="#ffff" onPress={()=>navigation.navigate("serverConnection")}>Connect Server</Button>
             </View>
             <View style={styles.imageContainer}>
                 <Image 

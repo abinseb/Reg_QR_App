@@ -173,6 +173,10 @@ useEffect(()=>{
                     <Text style={styles.value}>{qrData}</Text>
                 </View>
                 <View style={styles.profileBox}>
+                    <Text style={styles.label}>Ip: </Text>
+                    <Text style={styles.value}>{ipAddress[0]}</Text>
+                </View>
+                <View style={styles.profileBox}>
                     <Text style={styles.label}>Name: </Text>
                     <Text style={styles.value}>{userob["Name"]}</Text>
                 </View>

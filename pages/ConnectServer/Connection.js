@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Box, Text, Heading, VStack, FormControl, Input, Button, Center, NativeBaseProvider } from "native-base";
 import { useIpContext } from "../IpContext";
+import axios from "axios";
 
 const ConnectServer = () => {
   const { addIpAddress, ipAddress } = useIpContext();
@@ -19,6 +20,13 @@ const ConnectServer = () => {
       setConnectedIpAddresses([...connectedIpAddresses, ipAddressValue]);
       alert(`Connected to server at IP address: ${ipAddressValue}`);
     }
+    axios.get('http://'+ipAddressValue+'/gun/')
+    .then(()=>{
+      alert('Server Connected');
+    })
+    .catch(()=>{
+      alert("Server is Not connected");
+    })
   };
 
   return (
