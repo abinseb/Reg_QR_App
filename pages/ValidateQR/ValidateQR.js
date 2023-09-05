@@ -4,17 +4,32 @@ import { Button } from "react-native-paper";
 import Gun from "gun";
 import { useIpContext } from "../IpContext";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import axios from "axios";
+import { openDatabase } from "expo-sqlite";
+import { verified_Offline } from "../../database/SQLiteHelper";
 // gun js 
 // const [gun, setGun]=(`http://${ip}:5000/gun`);
 
 const ValidateQR = ({ route ,navigation}) => {
-    
+    // db connect
+    const db = openDatabase('Registration.db');
+
+
     const [userob,setuserob] = useState("")
     const { qrData } = route.params;
     // ipaddress
     const {ipAddress} = useIpContext();
     const [connectedAddresses, setConnectedAddresses] = useState([]);
+     // check online or Offline
+    const [networkStatus , setNetWorkStatus] = useState('');
+
+    // offline verified data count
+    const [count , setCount] = useState(0);
+
+    // offline Id
+    const [offlineId , setOffLineId] = useState('')
+   
+
     var gun=Gun({
      // peers:['http://192.168.1.126:5000/gun']
     })
@@ -22,7 +37,7 @@ const ValidateQR = ({ route ,navigation}) => {
   
 
     
-    var index="init123"
+    var index="init1234"
 
  //function acknowlege  network for new user 
  function inituser()
@@ -32,24 +47,11 @@ const ValidateQR = ({ route ,navigation}) => {
       
     }
   }
-  function pad(n, length) {
-    var len = length - (''+n).length;
-    return (len > 0 ? new Array(++len).join('0') : '') + n
-  }
+ 
 
-  function getusers()
-  {
-    gun1=Gun({
-      peers:[`http://${ipAddress[0]}/gun`]
-    })
-    for (let i=1;i<=3000;i++)
-    {
-      console.log(pad(i,3))
-      gun1.get(index+'/'+pad(i,3)).once((data) =>{
-       console.log(data)
-      })
-    }
-    
+  function getLocalStorageData(item){
+    const storageData = localStorage.getItem(item)
+    return storageData;
   }
   
   
@@ -75,59 +77,117 @@ const ValidateQR = ({ route ,navigation}) => {
     })
     //getkey()
   }
- 
  const navigateToHome=()=>{
     navigation.navigate("Home");
  }
 
 //  fetching data from gun js
 
-useEffect(()=>{
-  const gun1=Gun({
-    peers:[`http://${ipAddress[0]}/gun`]
-  })
-  
-  console.log([`http://${ipAddress[0]}/gun`])
-    gun1.get(index+'/'+qrData).once((data) =>{
-        if ( data === undefined)
-        {
-          alert ("user not found");
-          
-        }
-        else{
-        setuserob(
-          {
-            Name: data.Name,
-            Institution: data.Institution,
-            Email: data.Email,
-            Phone: data.Phone,
-            Verified: data.Verified
-          }
-        )
-        }
-      })
-      gun1.get(index+'/'+qrData).on((data) =>{
-        if ( data === undefined)
-        {
-          alert ("user not found");
-        }
-        else{
-        setuserob(
-          {
-            Name: data.Name,
-            Institution: data.Institution,
-            Email: data.Email,
-            Phone: data.Phone,
-            Verified: data.Verified
-          }
-        )
-        }
-      })
+useEffect(() => {
+  // fetch offlineverified datacount
+  offlineDataCount();
+  axios.get(`http://${ipAddress[0]}/gun/`)
+    .then(() => {
+      setNetWorkStatus('Online');
+      // call data count
+      console.log("cooooo",count);
+      // sync data to the gun when network is online
+      // if(count >0){
+        syncOffline_dataToGun();
+        console.log("syncsyncsync");
+        // }
 
-},[])
+      const gun1 = Gun({
+        peers: [`http://${ipAddress[0]}/gun`]
+      });
+
+      gun1.get(index + '/' + qrData).once((data) => {
+        if (data === undefined) {
+          alert("User not found");
+        } else {
+          setuserob({
+            Name: data.Name,
+            Institution: data.Institution,
+            Email: data.Email,
+            Phone: data.Phone,
+            Verified: data.Verified
+          });
+        }
+      });
+
+      gun1.get(index + '/' + qrData).on((data) => {
+        
+          setuserob({
+            Name: data.Name,
+            Institution: data.Institution,
+            Email: data.Email,
+            Phone: data.Phone,
+            Verified: data.Verified
+          });
+        
+      });
+     
+      console.log('Online mode');
+    })
+    .catch((er) => {
+      // alert("Offline mode");
+      console.log("Offline");
+      setNetWorkStatus('Offline');
+      // table
+      // verified_Offline();
+
+      // Fetch data from SQLite
+      db.transaction(tx => {
+        tx.executeSql(
+          `SELECT * FROM gun_data WHERE Id = ?;`,
+          [qrData],
+          (_, { rows }) => {
+            const data = rows._array;
+            if (data.length > 0) {
+              setuserob({
+                Name: data[0].Name,
+                Institution: data[0].Institution,
+                Email: data[0].Email,
+                Phone: data[0].Phone,
+                Verified: data[0].Verified
+              });
+             
+            } else {
+              alert("Data Not Found");
+            }
+          },
+          (_, error) => {
+            console.error("Error fetching data from SQLite:", error);
+            alert("Error fetching data from SQLite");
+          }
+        );
+      });
+    });
+}, []);
+
+
+
+
+// insert to offline server
+const load_ToOfflineServer = (qrData) => {
+  db.transaction((tx) => {
+    tx.executeSql(
+      'INSERT INTO verified_data (Id) VALUES (?);',
+      [qrData],
+      (_, { insertId }) => {
+        console.log(`Inserted data with id ${insertId}`);
+      },
+      (error) => {
+        console.error('Error inserting', error);
+      }
+    );
+  });
+};
+
 
 const handleVerification=async()=>{
     // alert("succcess");
+    if(networkStatus === 'Online'){
     const gun1=Gun({
       peers:[`http://${ipAddress[0]}/gun`]
     })
@@ -145,7 +205,95 @@ const handleVerification=async()=>{
         alert("Somthing Wrong")
     }
 
+  }
+  else{
+
+   
+    console.log('load to off');
+    db.transaction((tx) => {
+      tx.executeSql(
+        `UPDATE gun_data SET Verified = ? WHERE Id = ?;`,
+        [true, qrData],
+        (_, { rowsAffected }) => {
+          if (rowsAffected > 0) {
+            alert("Verification Successful");
+            load_ToOfflineServer(qrData);
+            navigateToHome(); // You can add your navigation logic here
+          } else {
+            alert("Verification Failed");
+          }
+        },
+        (_, error) => {
+          console.error("Error updating Verification:", error);
+          alert("Error updating Verification");
+        }
+      );
+    });
+  }
+
 }
+
+// sync the updated data id to the gun server
+const syncOffline_dataToGun =()=>{
+  db.transaction(tx =>{
+    tx.executeSql(
+      `SELECT Id FROM verified_data;`,
+      [],
+      (_,{rows})=>{
+        const data = rows._array.map((row)=>row.Id);
+        console.log("Fetched Id Values:",data);
+
+        // syncing code to the gun
+        const gun1 = Gun({
+          peers:[`http://${ipAddress[0]}/gun`]
+        })
+          data.forEach(dataItem =>{
+            gun1.get(index+'/'+dataItem).put({"Verified":true})
+          })
+        
+          deleteAllDataFromOfflineServer();
+          offlineDataCount();
+      },
+      (_,error)=>{
+        console.log('Error fetching data', error);
+      }
+
+    );
+  });
+};
+
+function offlineDataCount(){
+  db.transaction(tx =>{
+    tx.executeSql(
+      'SELECT COUNT(*) AS rowCount FROM verified_data;',
+      [],
+      (_, { rows }) =>{
+        const countData = rows.item(0).rowCount;
+        console.log('Number of count :',countData);
+        setCount(countData);
+      },
+      (_, error) =>{
+        console.error('Error fetching record count:', error);
+      }
+    );
+  });
+};
+
+function deleteAllDataFromOfflineServer(){
+  db.transaction((tx)=>{
+    tx.executeSql('DELETE FROM verified_data;',
+    [],(_,result)=>{
+      if(result.rowsAffected >0){
+        console.log('Deleted offline server');
+      }
+      else{
+        console.log("No records")
+      }
+    }
+    );
+  });
+}
+
 
 // avoid the back navigation
 useEffect(()=>{
@@ -167,6 +315,12 @@ useEffect(()=>{
 
     return (
             <SafeAreaView style={styles.container}>
+              <View style={styles.ViewNetwork}>
+                <Text style={styles.networkText}>{networkStatus}</Text>
+              </View>
+              <View style={styles.ViewCount}>
+                <Text style={styles.networkText}>Offline Verified Count :{count}</Text>
+              </View>
             <View style={styles.viewBox}>
                 <View style={styles.profileBox}>
                     <Text style={styles.label}>Id: </Text>
@@ -216,17 +370,13 @@ useEffect(()=>{
                 </View>
                 }
 
-              <Text>Connected Servers:</Text>
-                    {/* <ul>
-                      {connectedAddresses.map((ip, index) => (
-                        <li key={index}>{ip}</li>
-                      ))}
-                    </ul> */}
+                <Button mode="contained" style={styles.cancelButton} 
+                      onPress={syncOffline_dataToGun} 
+                  >
+                      Sync
+                  </Button>
             </View>
-            <Button mode="contained" style={styles.cancelButton} 
-                      onPress={getusers}>
-              load data
-            </Button>
+           
         </SafeAreaView>
 
         
@@ -293,6 +443,23 @@ const styles = StyleSheet.create({
   },
   btnBacktoHome:{
     backgroundColor:'#1e7898'
+  },
+  ViewNetwork :{
+    alignSelf:'center',
+    position:'absolute',
+    top:0,
+    paddingVertical:20,
+  },
+  networkText:{
+    color:'#fff',
+    paddingTop:20,
+
+  },
+  ViewCount:{
+    alignSelf:'center',
+    
+    paddingVertical:20,
+
   }
 });
 

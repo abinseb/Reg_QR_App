@@ -9,11 +9,14 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.19.3",
     "@react-navigation/native": "^6.1.7",
     "@react-navigation/native-stack": "^6.9.13",
     "axios": "^1.5.0",
     "expo": "~49.0.7",
     "expo-barcode-scanner": "^12.5.3",
+    "expo-build-properties": "~0.8.3",
+    "expo-file-system": "^15.4.4",
     "expo-status-bar": "~1.6.0",
     "gun": "^0.2020.1239",
     "native-base": "^3.4.28",
@@ -22,7 +25,7 @@
     "react-native-paper": "^5.10.1",
     "react-native-safe-area-context": "^4.7.2",
     "react-native-screens": "^3.25.0",
-    "expo-build-properties": "~0.8.3"
+    "expo-sqlite": "~11.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
