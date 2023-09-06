@@ -40,11 +40,19 @@ const ConnectServer = () => {
       .then((res) => {
         console.log('http://'+ipAddressValue+'/getdata');
         console.log(res.data);
-        setDataArray(res.data);
-        // Call load_data() only after data is fetched
-        setLoading(true);
+        // setDataArray(res.data);
+        // // Call load_data() only after data is fetched
+        
+        // console.log(dataArray);
         // load_data();
-        Check_The_DB();
+        // // Check_The_DB();
+        setDataArray((prevDataArray) => {
+          const newDataArray = [...prevDataArray, ...res.data];
+          // Call load_data() after updating dataArray
+          Check_The_DB(newDataArray);
+          return newDataArray;
+        });
+
       })
       .catch((err) => {
         console.log(err);
@@ -69,9 +77,12 @@ const ConnectServer = () => {
 
 const db = openDatabase('Registration.db');
 
-function load_data(){
+// load data from mongo to local sqlite
+function load_data(newDataArray){
+  setLoading(true);
+  console.log(dataArray);
   db.transaction(tx=>{
-    dataArray.forEach(dataItem=> {
+    newDataArray.forEach(dataItem=> {
           tx.executeSql(
             'INSERT INTO gun_data (Id , Name , Institution, Email , Phone , Verified) VALUES (?,?,?,?,?,?);',
             [
@@ -92,7 +103,7 @@ function load_data(){
 
 
 
-function Check_The_DB() {
+function Check_The_DB(newDataArray) {
   db.transaction(tx => {
     tx.executeSql(
       'SELECT COUNT(*) AS rowCount FROM gun_data;',
@@ -100,8 +111,9 @@ function Check_The_DB() {
       (_, { rows }) => {
         const { rowCount } = rows.item(0);
         if (rowCount === 0) {
+          load_data(newDataArray);
           console.log('gun_data table is empty. Calling load_data...');
-          load_data();
+          
         } else {
           console.log('gun_data table is not empty.');
         }
@@ -213,7 +225,7 @@ const displayIp=()=>{
             <Button mt="2" colorScheme="teal" bg="#006400" onPress={ConnectWithServer}>
               Connect..
             </Button>
-            <Button mt="2" colorScheme="teal" bg="#006400" onPress={load_data}>
+            <Button mt="2" colorScheme="teal" bg="#006400" onPress={DeleteWholeData}>
               loadStoredDataInSqlite..
             </Button>
             

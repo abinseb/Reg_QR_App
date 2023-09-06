@@ -249,6 +249,7 @@ const syncOffline_dataToGun =()=>{
         })
           data.forEach(dataItem =>{
             gun1.get(index+'/'+dataItem).put({"Verified":true})
+            console.log("synced");
           })
         
           deleteAllDataFromOfflineServer();
@@ -318,6 +319,16 @@ useEffect(()=>{
               <View style={styles.ViewNetwork}>
                 <Text style={styles.networkText}>{networkStatus}</Text>
               </View>
+              {networkStatus === 'Online' && (
+              <View style={styles.synButtonView}>
+              <Button mode="contained" style={styles.synButton} textColor='#000'
+                      onPress={syncOffline_dataToGun} 
+                  >
+                      Sync
+                  </Button>
+              </View>
+              )}
+
               <View style={styles.ViewCount}>
                 <Text style={styles.networkText}>Offline Verified Count :{count}</Text>
               </View>
@@ -370,11 +381,7 @@ useEffect(()=>{
                 </View>
                 }
 
-                <Button mode="contained" style={styles.cancelButton} 
-                      onPress={syncOffline_dataToGun} 
-                  >
-                      Sync
-                  </Button>
+                
             </View>
            
         </SafeAreaView>
@@ -459,6 +466,17 @@ const styles = StyleSheet.create({
     alignSelf:'center',
     
     paddingVertical:20,
+
+  },
+  synButtonView:{
+    alignSelf:'center',
+    padding:10,
+   
+  },
+  synButton:{
+    backgroundColor:'#ffff',
+    marginTop:20,
+    
 
   }
 });
