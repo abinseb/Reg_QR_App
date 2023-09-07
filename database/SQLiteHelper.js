@@ -2,6 +2,7 @@ import { openDatabase } from "expo-sqlite";
 
 const db = openDatabase('Registration.db');
 
+export const ipDataLocal =()=>{
 db.transaction(tx1 => {
     tx1.executeSql(
         'CREATE TABLE IF NOT EXISTS ip_data (ipurl TEXT);',
@@ -10,6 +11,8 @@ db.transaction(tx1 => {
         error => console.error('Error:', error)
     );
 });
+}
+
 export const verified_Offline=()=>{
 db.transaction(tx2 =>{
   tx2.executeSql(
@@ -22,7 +25,7 @@ db.transaction(tx2 =>{
 }
 
 // table for storing registration data
-
+export const createdataLocal =()=>{
 db.transaction(tx =>{
     tx.executeSql(
         'CREATE TABLE IF NOT EXISTS gun_data (Id INTEGER PRIMARY KEY, Name TEXT, Institution TEXT, Email TEXT, Phone TEXT, Verified BOOLEAN);',
@@ -31,6 +34,7 @@ db.transaction(tx =>{
         error => console.error('Error creating table :',error)
     );
 });
+}
 
 
 export const insertData = (data) => {

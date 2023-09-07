@@ -28,7 +28,7 @@ const ValidateQR = ({ route ,navigation}) => {
 
     // offline Id
     const [offlineId , setOffLineId] = useState('')
-   
+    var c;
 
     var gun=Gun({
      // peers:['http://192.168.1.126:5000/gun']
@@ -91,11 +91,12 @@ useEffect(() => {
       setNetWorkStatus('Online');
       // call data count
       console.log("cooooo",count);
+      console.log("tempcount :",c);
       // sync data to the gun when network is online
-      // if(count >0){
+      if(c > 0){
         syncOffline_dataToGun();
         console.log("syncsyncsync");
-        // }
+        }
 
       const gun1 = Gun({
         peers: [`http://${ipAddress[0]}/gun`]
@@ -235,6 +236,7 @@ const handleVerification=async()=>{
 
 // sync the updated data id to the gun server
 const syncOffline_dataToGun =()=>{
+ 
   db.transaction(tx =>{
     tx.executeSql(
       `SELECT Id FROM verified_data;`,
@@ -261,6 +263,7 @@ const syncOffline_dataToGun =()=>{
 
     );
   });
+
 };
 
 function offlineDataCount(){
@@ -270,6 +273,7 @@ function offlineDataCount(){
       [],
       (_, { rows }) =>{
         const countData = rows.item(0).rowCount;
+        c=countData;
         console.log('Number of count :',countData);
         setCount(countData);
       },

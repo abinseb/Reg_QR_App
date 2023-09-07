@@ -4,7 +4,7 @@ import { useIpContext } from "../IpContext";
 import axios from "axios";
 import Gun from "gun";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createdata } from "../../database/SQLiteHelper";
+import { ipDataLocal,createdataLocal,verified_Offline } from "../../database/SQLiteHelper";
 
 import { openDatabase } from "expo-sqlite";
 
@@ -20,7 +20,7 @@ const ConnectServer = () => {
 
   const [dataArray, setDataArray] = useState([])
  
-  // createdata();
+ 
   
  
 
@@ -35,34 +35,36 @@ const ConnectServer = () => {
       alert(`Connected to server at IP address: ${ipAddressValue}`);
     }
   
-    // connect with mongodb and fetch data
-    axios.get('http://'+ipAddressValue+'/getdata')
-      .then((res) => {
-        console.log('http://'+ipAddressValue+'/getdata');
-        console.log(res.data);
-        // setDataArray(res.data);
-        // // Call load_data() only after data is fetched
-        
-        // console.log(dataArray);
-        // load_data();
-        // // Check_The_DB();
-        setDataArray((prevDataArray) => {
-          const newDataArray = [...prevDataArray, ...res.data];
-          // Call load_data() after updating dataArray
-          Check_The_DB(newDataArray);
-          return newDataArray;
-        });
-
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  
     insertIpAddress(ipAddressValue);
     // check the data connection
     axios.get('http://'+ipAddressValue+'/gun/')
       .then(() => {
         alert('Server Connected');
+        ipDataLocal();
+        createdataLocal();
+        verified_Offline();
+         // connect with mongodb and fetch data
+    axios.get('http://'+ipAddressValue+'/getdata')
+    .then((res) => {
+      console.log('http://'+ipAddressValue+'/getdata');
+      console.log(res.data);
+      // setDataArray(res.data);
+      // // Call load_data() only after data is fetched
+      
+      // console.log(dataArray);
+      // load_data();
+      // // Check_The_DB();
+      setDataArray((prevDataArray) => {
+        const newDataArray = [...prevDataArray, ...res.data];
+        // Call load_data() after updating dataArray
+        Check_The_DB(newDataArray);
+        return newDataArray;
+      });
+
+    })
+    .catch((err) => {
+      console.log(err);
+    });
         
       })
       .catch(() => {
@@ -202,6 +204,28 @@ const displayIp=()=>{
   })
 }
 
+const dblist = () => {
+  // Open the SQLite database (replace 'Registration.db' with your database file)
+  // const db = openDatabase('Registration.db');
+
+  db.transaction((tx) => {
+    tx.executeSql(
+      "SELECT name FROM sqlite_master WHERE type='table'",
+      [],
+      (_, { rows }) => {
+        const tableNames = [];
+        for (let i = 0; i < rows.length; i++) {
+          tableNames.push(rows.item(i).name);
+        }
+        console.log('Tables in the database:', tableNames);
+      },
+      (error) => {
+        console.error('Error fetching table names:', error);
+      }
+    );
+  });
+};
+
   return (
     <NativeBaseProvider>
       <Center w="100%">
@@ -225,7 +249,7 @@ const displayIp=()=>{
             <Button mt="2" colorScheme="teal" bg="#006400" onPress={ConnectWithServer}>
               Connect..
             </Button>
-            <Button mt="2" colorScheme="teal" bg="#006400" onPress={DeleteWholeData}>
+            <Button mt="2" colorScheme="teal" bg="#006400" onPress={dblist}>
               loadStoredDataInSqlite..
             </Button>
             
